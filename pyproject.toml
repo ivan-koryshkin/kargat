@@ -1,0 +1,25 @@
+[project]
+name = "Kargat"
+version = "0.0.1"
+authors = [
+  { name="Ivan Koryshkin", email="ivan.koryshkin@gmail.com" },
+]
+description = "Project managment tool from Python developer to Python developers"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/ivan-koryshkin"
+"Bug Tracker" = "https://github.com/ivan-koryshkin"
+
+[build-system]
+requires = [
+  "setuptools>=61.0",
+  "pyyaml"
+]
+build-backend = "setuptools.build_meta"

@@ -1,0 +1,8 @@
+.idea
+.vscode
+.venv/
+venv/
+**/__pycache__/**
+dist/
+dep.yaml
+src/Kargat.egg-info/
