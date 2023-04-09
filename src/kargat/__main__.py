@@ -2,12 +2,27 @@ import argparse
 from kargat import pm
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument(
-    'command',
-    metavar='command',
-    type=str,
-    nargs='+',
-    help="Run kargat command"
+    'init', 
+    metavar='init', 
+    type=str, 
+    nargs='+', 
+    help="Init Kargat project"
 )
+
+parser.add_argument(
+    'install', 
+    metavar='install', 
+    type=str, 
+    nargs='+', 
+    help="Install package `install <package>` or `install` to install all from yaml"
+)
+parser.add_argument(
+    'uninstall', 
+    metavar='uninstall', 
+    type=str, nargs='+', 
+    help="Uninstall package `unnstall <package>` or `uninstall` to uninstall all from yaml")
+
+parser.add_argument('run', metavar='run', type=str, nargs='+', help="run <command> from yaml")
 parser.add_argument(
     '-m',
     '--mode',
@@ -18,5 +33,4 @@ parser.add_argument(
 args = parser.parse_args()
 print(args)
 
-m = pm.ConfigManger(args.command)
-m.run()
+pm.ConfigManger(args.command).run()
