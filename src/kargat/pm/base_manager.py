@@ -10,8 +10,7 @@ class BaseManager:
         self._mode = ""
         self._section = section
         self._config_file = file if file else FILE_NAME
-        self.logger = logging.getLogger('kargat')
-        logging.basicConfig('%(message)s')
+        self.logger = logging.getLogger("kargat")
 
     def get_root(self):
         return self._file_repr.get('kargat')
