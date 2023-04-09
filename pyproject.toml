@@ -17,8 +17,8 @@ dynamic = ["dependencies"]
 dependencies = {file = ["requirements.txt"]}
 
 [project.urls]
-"Homepage" = "https://github.com/ivan-koryshkin"
-"Bug Tracker" = "https://github.com/ivan-koryshkin"
+"Homepage" = "https://github.com/ivan-koryshkin/kargat"
+"Bug Tracker" = "https://github.com/ivan-koryshkin/kargat/issues"
 
 [build-system]
 requires = ["setuptools>=61.0"]
