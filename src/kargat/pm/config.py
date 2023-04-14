@@ -1,8 +1,8 @@
-FILE_NAME = '/home/ivan/Code/kargat/src/kargat/dep.yaml'
+FILE_NAME = 'kargat.yaml'
 ROOT = "kargat"
 ENVIRONMENT = "env"
 ENVIRONMENT_FILE = "env_file"
-REQUIREMENTS = "requiremnts"
+REQUIREMENTS = "requirements"
 DEV = "dev"
 PROD = "prod"
 TEST = "test"
@@ -14,3 +14,6 @@ PYTHONUNBUFFERED="PYTHONUNBUFFERED=1"
 NAME = "name"
 VERSION = "version"
 AUTHOR = "author"
+CMD_ARG_INIT = 'init'
+
+
