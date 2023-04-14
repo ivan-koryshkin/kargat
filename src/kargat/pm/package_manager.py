@@ -11,8 +11,8 @@ UNINSTALL = "uninstall"
 
 
 class PackageManager(BaseManager):
-    def __init__(self, *args, **kwargs):
-        super().__init__(REQUIREMENTS, *args, **kwargs)
+    def __init__(self, mode, *args, **kwargs):
+        super().__init__(REQUIREMENTS, mode=mode, *args, **kwargs)
 
     def parse_packages(self) -> Dict[str, str]:
         """
@@ -39,7 +39,7 @@ class PackageManager(BaseManager):
     def _pkg_str(name, version):
         return f"{name}=={version}" if version else name
 
-    def _pip_do(self, cmd, name, version=None):
+    def _pip_do(self, cmd, name, version=None, upgrade=False):
         """
         Python-pip wrapper
         :param cmd: pip command
@@ -52,22 +52,26 @@ class PackageManager(BaseManager):
         else:
             pkg = f"{name}=={version}"
         args = [sys.executable, "-m", "pip", cmd, pkg]
+        if cmd == 'install' and upgrade:
+            args.append('-U')
         if cmd == UNINSTALL:
             args += ['-y']
-        
-        self.console_info(f"[REQUIREMENT] {pkg}")
-        res = subprocess.check_call(
-            args, 
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT
-        )
-        if res.returncode != 0:
-            print("Error")
 
-    def for_each_package(self, cmd):
+        res = ""
+        try:
+            res = subprocess.run(
+                args,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.STDOUT
+            )
+        except Exception as ex:
+            print(ex)
+
+    def for_each_package(self, cmd: str, upgrade: bool = False):
         """
         Run python-pip for each package in section 'mode'
         :param cmd: python-pip command
+        :param upgrade: update package if exist
         :return: None
         """
         packages = self.parse_packages()
@@ -75,15 +79,18 @@ class PackageManager(BaseManager):
             version = packages[name]
             if version == 'latest':
                 version = None
-            self._pip_do(cmd, name, version)
+            # todo: Change to logging
+            msg = f"Installing:" if cmd == INSTALL else f"Uninstalling:"
+            print(msg, name)
+            self._pip_do(cmd, name, version, upgrade=upgrade)
 
-    def install_all(self):
-        self.for_each_package(INSTALL)
+    def install_all(self, upgrade=False):
+        self.for_each_package(INSTALL, upgrade)
 
     def uninstall_all(self):
         self.for_each_package(UNINSTALL)
 
-    def install(self, name: str):
+    def install(self, name: str, upgrade: bool):
         """
         cli `install` command 
         """
@@ -95,8 +102,12 @@ class PackageManager(BaseManager):
         else:
             pkg = parts[0]
             version = 'latest'
-        self._pip_do(INSTALL, pkg, version)
-        section[self._mode][pkg] = version
+        # todo: Change to logging
+        print("Installing: ", name)
+        self._pip_do(INSTALL, pkg, version, upgrade)
+        modes = self.get_dependency(self.mode)
+        for mode in modes:
+            section[mode][pkg] = version
         self.file_add_item(section)
     
     def uninstall(self, name: str):
@@ -104,6 +115,8 @@ class PackageManager(BaseManager):
         cli `remove` command
         """
         parts = name.split("=")
+        # todo: Change to logging
+        print("Uninstalling: ", name)
         self._pip_do(UNINSTALL, parts[0])
         self.file_remove_item(parts[0])
 
@@ -119,8 +132,9 @@ class PackageManager(BaseManager):
     
     def file_remove_item(self, item):
         self._load_file()
-        for stage in [DEV, PROD, TEST]:
-            if item in self._file_repr[ROOT][REQUIREMENTS][stage]:
-                self._file_repr[ROOT][REQUIREMENTS][stage].pop(item)
+        modes = self.get_dependency(self.mode)
+        for mode in modes:
+            if item in self._file_repr[ROOT][REQUIREMENTS][mode]:
+                self._file_repr[ROOT][REQUIREMENTS][mode].pop(item)
                 with open(self._config_file, 'w') as f:
                     yaml.safe_dump(self._file_repr, f)

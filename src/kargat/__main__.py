@@ -1,36 +1,111 @@
 import argparse
-from kargat import pm
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument(
-    'init', 
-    metavar='init', 
-    type=str, 
-    nargs='+', 
-    help="Init Kargat project"
+
+try:
+    import pm
+except Exception as ex:
+    from . import pm
+
+"""
+Install parser
+"""
+install_parser = argparse.ArgumentParser(add_help=True)
+install_parser.add_argument(
+    '-i', '--install',
+    type=str,
+    nargs='*',
+    help="Install packages",
+    required=False
+)
+install_parser.add_argument(
+    '-u', '--uninstall',
+    type=str,
+    nargs='*',
+    help="Uninstall packages",
+    required=False
 )
 
-parser.add_argument(
-    'install', 
-    metavar='install', 
-    type=str, 
-    nargs='+', 
-    help="Install package `install <package>` or `install` to install all from yaml"
+install_parser.add_argument(
+    "-U",
+    "--upgrade",
+    help="Update package if exist on installation step",
+    action="store_true",
+    default=False,
 )
-parser.add_argument(
-    'uninstall', 
-    metavar='uninstall', 
-    type=str, nargs='+', 
-    help="Uninstall package `unnstall <package>` or `uninstall` to uninstall all from yaml")
-
-parser.add_argument('run', metavar='run', type=str, nargs='+', help="run <command> from yaml")
-parser.add_argument(
-    '-m',
-    '--mode',
-    default="dev",
-    help='Application mode, default mode "dev"'
+"""
+Init parser
+"""
+init_parser = argparse.ArgumentParser(add_help=False)
+init_parser.add_argument(
+    "--init",
+    help="Init Kargat project",
+    action="store_true",
+    default=False
 )
 
-args = parser.parse_args()
-print(args)
+run_parser = argparse.ArgumentParser(add_help=False)
+run_parser.add_argument(
+    "-r",
+    "--run",
+    type=str,
+    nargs='*',
+    help="Run command from kargat.yaml",
+)
 
-pm.ConfigManger(args.command).run()
+mode_parser = argparse.ArgumentParser(add_help=False)
+mode_parser.add_argument(
+    "-m",
+    "--mode",
+    type=str,
+    nargs=1,
+    help="Kargat mode"
+)
+
+cmd_parser = argparse.ArgumentParser(
+    conflict_handler='resolve',
+    parents=[install_parser, init_parser, run_parser, mode_parser],
+    usage="""
+    Init project
+    >: kargat --init
+
+    Install packages
+    >: kargat install <package name 0> <package name 1> ... <package name N>
+    
+    Install package (update if exist)
+    >: kargat --install <package name> -U
+    >: kargat --install <package name> --prod (install only for prod)
+    >: kargat --install <package name> --test (install only for test) 
+    
+    Install all packages from kargat.yaml
+    >: kargat --install
+    >: kargat -i
+    
+    Install or upgrade
+    >: kargat --install -U
+    >: kargat -i -U
+    
+    Uninstall package
+    >: kargat uninstall <package name> 
+        or 
+    >: kargat -u <package name>
+    
+    Uninstall all packages from kargat.yaml
+    >: kargat uninstall 
+        or
+    >: kargat -u 
+    """
+)
+
+try:
+    args = cmd_parser.parse_args()
+    cm = pm.ConfigManger(
+        init=args.init,
+        install=args.install,
+        uninstall=args.uninstall,
+        run=args.run,
+        upgrade=args.upgrade,
+        mode=args.mode
+    )
+    cm.run()
+except Exception as ex:
+    # cmd_parser.print_help()
+    print(ex)
